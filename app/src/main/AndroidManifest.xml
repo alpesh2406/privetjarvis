@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Needed to listen to your voice -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Needed to call Claude's API -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Needed to set alarms directly -->
+    <uses-permission android:name="android.permission.SET_ALARM" />
+    <!-- Needed if you want Jarvis to place calls directly (optional, ask before using) -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Private Jarvis"
+        android:theme="@style/Theme.PrivateJarvis"
+        android:usesCleartextTraffic="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
