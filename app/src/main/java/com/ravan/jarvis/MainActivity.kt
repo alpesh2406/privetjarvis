@@ -305,8 +305,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 }
             }
             "open_app" -> {
-                val packageName = parts.getOrNull(1)?.trim() ?: return
-                packageManager.getLaunchIntentForPackage(packageName)?.let { startActivity(it) }
+                val appName = parts.getOrNull(1)?.trim()?.lowercase() ?: return
+                val packageName = appPackageMap[appName] ?: appName
+                val opened = packageManager.getLaunchIntentForPackage(packageName)
+                if (opened != null) {
+                    startActivity(opened)
+                } else {
+                    Toast.makeText(this, "$appName phone mein nahi mila", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -345,11 +351,28 @@ an action tag in EXACTLY this format on its own, after your spoken reply:
 - Set an alarm: [ACTION: alarm|HH:MM]  (24-hour time)
 - Send a WhatsApp message: [ACTION: whatsapp|PHONE_NUMBER_WITH_COUNTRY_CODE|MESSAGE_TEXT]
 - Make a phone call: [ACTION: call|PHONE_NUMBER]
-- Open an app: [ACTION: open_app|PACKAGE_NAME]  (only if you know the exact Android package name)
+- Open an app: [ACTION: open_app|APP_NAME]  (use simple names like youtube, whatsapp, chrome, camera, gallery, maps, instagram, facebook, settings, phone)
 
 Only include an action tag when the user's request clearly matches one of these.
 Otherwise just reply normally with no tag. Never invent phone numbers — ask the
 user for the number if they haven't given it.
 """
+
+        private val appPackageMap = mapOf(
+            "youtube" to "com.google.android.youtube",
+            "whatsapp" to "com.whatsapp",
+            "chrome" to "com.android.chrome",
+            "camera" to "com.android.camera",
+            "gallery" to "com.google.android.apps.photos",
+            "photos" to "com.google.android.apps.photos",
+            "maps" to "com.google.android.apps.maps",
+            "instagram" to "com.instagram.android",
+            "facebook" to "com.facebook.katana",
+            "settings" to "com.android.settings",
+            "phone" to "com.android.dialer",
+            "gmail" to "com.google.android.gm",
+            "playstore" to "com.android.vending",
+            "play store" to "com.android.vending"
+        )
     }
 }
