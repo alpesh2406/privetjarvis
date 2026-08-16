@@ -4,9 +4,14 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.AlarmClock
+import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -31,28 +36,18 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var conversationText: TextView
     private lateinit var statusText: TextView
     private lateinit var outerRing: android.widget.ImageView
+    private lateinit var dashedRing: android.widget.ImageView
     private lateinit var tts: TextToSpeech
+    private lateinit var speechRecognizer: SpeechRecognizer
 
+    private var isSpeaking = false
     private val history = mutableListOf<Pair<String, String>>()
-
-    private val speechLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val spokenText = result.data
-            ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            ?.firstOrNull()
-        if (!spokenText.isNullOrBlank()) {
-            appendToConversation("Aap", spokenText)
-            askJarvis(spokenText)
-        } else {
-            setStatus("Kuch sunayi nahi diya, dobara try karo")
-        }
-    }
+    private val handler = Handler(Looper.getMainLooper())
 
     private val permissionLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) startListening() else {
+        if (granted) startContinuousListening() else {
             Toast.makeText(this, "Mic permission chahiye Jarvis ke kaam karne ke liye", Toast.LENGTH_LONG).show()
         }
     }
@@ -65,17 +60,24 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         conversationText = findViewById(R.id.conversationText)
         statusText = findViewById(R.id.statusText)
         outerRing = findViewById(R.id.outerRing)
+        dashedRing = findViewById(R.id.dashedRing)
 
+        startAmbientAnimation()
+        setupSpeechRecognizer()
         tts = TextToSpeech(this, this)
 
-        micButton.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                == PackageManager.PERMISSION_GRANTED
-            ) {
-                startListening()
-            } else {
-                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            }
+        micButton.setOnClickListener { requestMicAndListen() }
+
+        requestMicAndListen()
+    }
+
+    private fun requestMicAndListen() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            startContinuousListening()
+        } else {
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
 
@@ -84,18 +86,87 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             tts.language = Locale.UK
             tts.setPitch(0.85f)
             tts.setSpeechRate(0.95f)
+            tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {}
+                override fun onDone(utteranceId: String?) {
+                    isSpeaking = false
+                    handler.post {
+                        setStatus("SYSTEM IDLE")
+                        startContinuousListening()
+                    }
+                }
+                override fun onError(utteranceId: String?) {
+                    isSpeaking = false
+                    handler.post { startContinuousListening() }
+                }
+            })
         }
     }
 
-    private fun startListening() {
-        setStatus("LISTENING...")
-        startRingAnimation()
+    private fun setupSpeechRecognizer() {
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        speechRecognizer.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                setStatus("LISTENING...")
+                startRingAnimation()
+                animateWaveform()
+            }
+            override fun onBeginningOfSpeech() {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() {
+                stopRingAnimation()
+                stopWaveform()
+            }
+            override fun onError(error: Int) {
+                stopRingAnimation()
+                stopWaveform()
+                if (!isSpeaking) restartListeningDelayed()
+            }
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                val spokenText = matches?.firstOrNull()
+                if (!spokenText.isNullOrBlank()) {
+                    appendToConversation("Aap", spokenText)
+                    askJarvis(spokenText)
+                } else {
+                    restartListeningDelayed()
+                }
+            }
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+    }
+
+    private fun startContinuousListening() {
+        if (isSpeaking) return
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "hi-IN")
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "Bolo...")
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
+            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
         }
-        speechLauncher.launch(intent)
+        try {
+            speechRecognizer.startListening(intent)
+        } catch (e: Exception) {
+            restartListeningDelayed()
+        }
+    }
+
+    private fun restartListeningDelayed() {
+        handler.postDelayed({ if (!isSpeaking) startContinuousListening() }, 800)
+    }
+
+    private fun startAmbientAnimation() {
+        val slowSpin = android.view.animation.RotateAnimation(
+            0f, 360f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
+        )
+        slowSpin.duration = 12000
+        slowSpin.repeatCount = android.view.animation.Animation.INFINITE
+        slowSpin.interpolator = android.view.animation.LinearInterpolator()
+        dashedRing.startAnimation(slowSpin)
     }
 
     private fun startRingAnimation() {
@@ -113,6 +184,32 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         outerRing.clearAnimation()
     }
 
+    private fun animateWaveform() {
+        val bars = listOf<android.view.View>(
+            findViewById(R.id.bar1), findViewById(R.id.bar2), findViewById(R.id.bar3),
+            findViewById(R.id.bar4), findViewById(R.id.bar5)
+        )
+        bars.forEach { bar ->
+            val anim = android.animation.ObjectAnimator.ofFloat(bar, "scaleY", 0.4f, 1.8f, 0.6f)
+            anim.duration = (300..700).random().toLong()
+            anim.repeatCount = android.animation.ObjectAnimator.INFINITE
+            anim.repeatMode = android.animation.ObjectAnimator.REVERSE
+            anim.start()
+            bar.tag = anim
+        }
+    }
+
+    private fun stopWaveform() {
+        val bars = listOf<android.view.View>(
+            findViewById(R.id.bar1), findViewById(R.id.bar2), findViewById(R.id.bar3),
+            findViewById(R.id.bar4), findViewById(R.id.bar5)
+        )
+        bars.forEach { bar ->
+            (bar.tag as? android.animation.ObjectAnimator)?.cancel()
+            bar.scaleY = 1f
+        }
+    }
+
     private fun askJarvis(userText: String) {
         setStatus("PROCESSING...")
         history.add("user" to userText)
@@ -123,15 +220,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 withContext(Dispatchers.Main) {
                     history.add("assistant" to replyText)
                     appendToConversation("Jarvis", replyText)
-                    setStatus("SYSTEM IDLE")
-                    stopRingAnimation()
+                    setStatus("SPEAKING...")
                     speak(replyText)
                     action?.let { performAction(it) }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     setStatus("ERROR: ${e.message}")
-                    stopRingAnimation()
+                    restartListeningDelayed()
                 }
             }
         }
@@ -216,7 +312,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun speak(text: String) {
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        isSpeaking = true
+        val params = Bundle()
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, "jarvis_reply")
     }
 
     private fun appendToConversation(speaker: String, text: String) {
@@ -228,6 +326,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     override fun onDestroy() {
+        speechRecognizer.destroy()
         tts.stop()
         tts.shutdown()
         super.onDestroy()

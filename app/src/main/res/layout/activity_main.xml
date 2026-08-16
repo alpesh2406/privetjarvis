@@ -1,88 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#0D1117"
-    android:padding="16dp">
+    android:background="#05080D">
 
-    <TextView
-        android:id="@+id/titleText"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="J . A . R . V . I . S"
-        android:textColor="#00E5FF"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.15"
-        android:gravity="center"
-        android:paddingTop="24dp"
-        android:paddingBottom="4dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="PRIVATE VOICE INTERFACE"
-        android:textColor="#4DE5FF"
-        android:textSize="11sp"
-        android:letterSpacing="0.2"
-        android:gravity="center"
-        android:paddingBottom="16dp" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
-            android:id="@+id/conversationText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tap the core and speak..."
-            android:textColor="#C9D1D9"
-            android:textSize="16sp"
-            android:lineSpacingExtra="6dp" />
-    </ScrollView>
+            android:text="J . A . R . V . I . S"
+            android:textColor="#00E5FF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.15"
+            android:gravity="center"
+            android:paddingTop="36dp"
+            android:paddingBottom="2dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PRIVATE VOICE INTERFACE"
+            android:textColor="#4DE5FF"
+            android:textSize="10sp"
+            android:letterSpacing="0.25"
+            android:gravity="center"
+            android:paddingBottom="20dp" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/conversationText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tap the core and speak..."
+                android:textColor="#C9D1D9"
+                android:textSize="15sp"
+                android:lineSpacingExtra="6dp" />
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/waveformRow"
+            android:layout_width="wrap_content"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp">
+
+            <View android:id="@+id/bar1" android:layout_width="4dp" android:layout_height="8dp" android:layout_marginEnd="4dp" android:background="#00E5FF" />
+            <View android:id="@+id/bar2" android:layout_width="4dp" android:layout_height="14dp" android:layout_marginEnd="4dp" android:background="#00E5FF" />
+            <View android:id="@+id/bar3" android:layout_width="4dp" android:layout_height="20dp" android:layout_marginEnd="4dp" android:background="#00E5FF" />
+            <View android:id="@+id/bar4" android:layout_width="4dp" android:layout_height="12dp" android:layout_marginEnd="4dp" android:background="#00E5FF" />
+            <View android:id="@+id/bar5" android:layout_width="4dp" android:layout_height="18dp" android:background="#00E5FF" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SYSTEM IDLE"
+            android:textColor="#8B949E"
+            android:textSize="12sp"
+            android:letterSpacing="0.15"
+            android:gravity="center"
+            android:paddingBottom="16dp" />
+
+        <FrameLayout
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="28dp">
+
+            <ImageView
+                android:id="@+id/dashedRing"
+                android:layout_width="240dp"
+                android:layout_height="240dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ring_dashed" />
+
+            <ImageView
+                android:id="@+id/outerRing"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ring_outer" />
+
+            <ImageView
+                android:id="@+id/innerRing"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ring_inner" />
+
+            <Button
+                android:id="@+id/micButton"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:text="🎤"
+                android:textSize="30sp"
+                android:background="@drawable/mic_core"
+                android:elevation="8dp" />
+        </FrameLayout>
+
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/statusText"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SYSTEM IDLE"
-        android:textColor="#8B949E"
-        android:textSize="12sp"
-        android:letterSpacing="0.1"
-        android:gravity="center"
-        android:paddingBottom="20dp" />
+        android:layout_gravity="top|start"
+        android:layout_margin="10dp"
+        android:text="SYS.STATUS\nONLINE"
+        android:textColor="#4DE5FF"
+        android:textSize="9sp"
+        android:fontFamily="monospace"
+        android:lineSpacingExtra="2dp" />
 
-    <FrameLayout
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="32dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="10dp"
+        android:text="SIGNAL\n98%"
+        android:textColor="#4DE5FF"
+        android:textSize="9sp"
+        android:fontFamily="monospace"
+        android:gravity="end"
+        android:lineSpacingExtra="2dp" />
 
-        <ImageView
-            android:id="@+id/outerRing"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:src="@drawable/ring_outer" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="10dp"
+        android:text="MODEL: GROQ-LLAMA\nREV. 3.3"
+        android:textColor="#2E4A52"
+        android:textSize="8sp"
+        android:fontFamily="monospace"
+        android:lineSpacingExtra="2dp" />
 
-        <ImageView
-            android:id="@+id/innerRing"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ring_inner" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="10dp"
+        android:text="RAVAN CRICKET CO."
+        android:textColor="#2E4A52"
+        android:textSize="8sp"
+        android:fontFamily="monospace" />
 
-        <Button
-            android:id="@+id/micButton"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:text="🎤"
-            android:textSize="30sp"
-            android:background="@drawable/mic_core"
-            android:elevation="8dp" />
-    </FrameLayout>
+    <View android:layout_width="24dp" android:layout_height="2dp" android:layout_gravity="top|start" android:layout_margin="4dp" android:background="#00E5FF" />
+    <View android:layout_width="2dp" android:layout_height="24dp" android:layout_gravity="top|start" android:layout_margin="4dp" android:background="#00E5FF" />
 
-</LinearLayout>
+    <View android:layout_width="24dp" android:layout_height="2dp" android:layout_gravity="top|end" android:layout_margin="4dp" android:background="#00E5FF" />
+    <View android:layout_width="2dp" android:layout_height="24dp" android:layout_gravity="top|end" android:layout_margin="4dp" android:background="#00E5FF" />
+
+    <View android:layout_width="24dp" android:layout_height="2dp" android:layout_gravity="bottom|start" android:layout_margin="4dp" android:background="#00E5FF" />
+    <View android:layout_width="2dp" android:layout_height="24dp" android:layout_gravity="bottom|start" android:layout_margin="4dp" android:background="#00E5FF" />
+
+    <View android:layout_width="24dp" android:layout_height="2dp" android:layout_gravity="bottom|end" android:layout_margin="4dp" android:background="#00E5FF" />
+    <View android:layout_width="2dp" android:layout_height="24dp" android:layout_gravity="bottom|end" android:layout_margin="4dp" android:background="#00E5FF" />
+
+</FrameLayout>
