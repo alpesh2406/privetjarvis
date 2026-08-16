@@ -89,9 +89,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            tts.language = Locale.UK
-            tts.setPitch(0.85f)
-            tts.setSpeechRate(0.95f)
+            tts.language = Locale("hi", "IN") // Hindi/Hinglish-friendly voice
         }
     }
 
@@ -135,36 +133,39 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun callClaude(turns: List<Pair<String, String>>): Pair<String, String?> {
         val client = OkHttpClient()
 
-        // Groq uses the OpenAI-compatible chat format: a "system" message is just
-        // the first entry in the messages array, followed by the conversation.
         val messagesJson = JSONArray()
-        messagesJson.put(JSONObject().put("role", "system").put("content", SYSTEM_PROMPT))
         turns.forEach { (role, content) ->
             messagesJson.put(JSONObject().put("role", role).put("content", content))
         }
 
         val body = JSONObject().apply {
-            put("model", "llama-3.3-70b-versatile")
+            put("model", "claude-sonnet-4-6")
             put("max_tokens", 400)
+            put("system", SYSTEM_PROMPT)
             put("messages", messagesJson)
         }
 
         val request = Request.Builder()
-            .url("https://api.groq.com/openai/v1/chat/completions")
-            .addHeader("Authorization", "Bearer ${Config.GROQ_API_KEY}")
+            .url("https://api.anthropic.com/v1/messages")
+            .addHeader("x-api-key", Config.ANTHROPIC_API_KEY)
+            .addHeader("anthropic-version", "2023-06-01")
             .addHeader("content-type", "application/json")
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
 
         client.newCall(request).execute().use { response ->
-            val responseBody = response.body?.string() ?: throw Exception("Khali response Groq se")
+            val responseBody = response.body?.string() ?: throw Exception("Khali response Claude se")
             if (!response.isSuccessful) throw Exception("API error: ${response.code} $responseBody")
 
             val json = JSONObject(responseBody)
-            val fullText = json.getJSONArray("choices")
-                .getJSONObject(0)
-                .getJSONObject("message")
-                .getString("content")
+            val contentArray = json.getJSONArray("content")
+            var fullText = ""
+            for (i in 0 until contentArray.length()) {
+                val block = contentArray.getJSONObject(i)
+                if (block.getString("type") == "text") {
+                    fullText += block.getString("text")
+                }
+            }
 
             // Parse out an [ACTION: type|param] tag if present
             val actionRegex = Regex("""\[ACTION:\s*(.*?)\]""")
