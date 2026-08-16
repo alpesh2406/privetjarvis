@@ -89,7 +89,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            tts.language = Locale("hi", "IN") // Hindi/Hinglish-friendly voice
+            tts.language = Locale.UK
+            tts.setPitch(0.85f)
+            tts.setSpeechRate(0.95f)
         }
     }
 
