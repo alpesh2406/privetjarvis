@@ -10,12 +10,23 @@
         android:id="@+id/titleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="PRIVATE JARVIS"
+        android:text="J . A . R . V . I . S"
         android:textColor="#00E5FF"
-        android:textSize="22sp"
+        android:textSize="24sp"
         android:textStyle="bold"
+        android:letterSpacing="0.15"
         android:gravity="center"
         android:paddingTop="24dp"
+        android:paddingBottom="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PRIVATE VOICE INTERFACE"
+        android:textColor="#4DE5FF"
+        android:textSize="11sp"
+        android:letterSpacing="0.2"
+        android:gravity="center"
         android:paddingBottom="16dp" />
 
     <ScrollView
@@ -27,7 +38,7 @@
             android:id="@+id/conversationText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Mic dabao aur bolna shuru karo..."
+            android:text="Tap the core and speak..."
             android:textColor="#C9D1D9"
             android:textSize="16sp"
             android:lineSpacingExtra="6dp" />
@@ -37,19 +48,41 @@
         android:id="@+id/statusText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Idle"
+        android:text="SYSTEM IDLE"
         android:textColor="#8B949E"
-        android:textSize="13sp"
+        android:textSize="12sp"
+        android:letterSpacing="0.1"
         android:gravity="center"
-        android:paddingBottom="12dp" />
+        android:paddingBottom="20dp" />
 
-    <Button
-        android:id="@+id/micButton"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
+    <FrameLayout
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_gravity="center"
-        android:text="🎤"
-        android:textSize="32sp"
-        android:backgroundTint="#00E5FF" />
+        android:layout_marginBottom="32dp">
+
+        <ImageView
+            android:id="@+id/outerRing"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/ring_outer" />
+
+        <ImageView
+            android:id="@+id/innerRing"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ring_inner" />
+
+        <Button
+            android:id="@+id/micButton"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:text="🎤"
+            android:textSize="30sp"
+            android:background="@drawable/mic_core"
+            android:elevation="8dp" />
+    </FrameLayout>
 
 </LinearLayout>
