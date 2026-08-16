@@ -220,7 +220,37 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun appendToConversation(speaker: String, text: String) {
+        conversationText.append("\n\n$speaker: $text")
+    }
 
-git add .
-git commit -m "Fix MainActivity to use Groq API"
-git push
+    private fun setStatus(text: String) {
+        statusText.text = text
+    }
+
+    override fun onDestroy() {
+        tts.stop()
+        tts.shutdown()
+        super.onDestroy()
+    }
+
+    companion object {
+        private const val SYSTEM_PROMPT = """
+You are Jarvis, a private voice assistant on the user's personal phone. The user
+runs a cricket bat business (Hard/Soft Tennis Ball bats, Kashmir/English willow)
+and speaks Hinglish. Reply naturally in the same language style as the user,
+keep spoken replies short and conversational since they will be read aloud by
+text-to-speech.
+
+If the user asks you to do one of these specific actions, end your reply with
+an action tag in EXACTLY this format on its own, after your spoken reply:
+- Set an alarm: [ACTION: alarm|HH:MM]  (24-hour time)
+- Send a WhatsApp message: [ACTION: whatsapp|PHONE_NUMBER_WITH_COUNTRY_CODE|MESSAGE_TEXT]
+- Make a phone call: [ACTION: call|PHONE_NUMBER]
+- Open an app: [ACTION: open_app|PACKAGE_NAME]  (only if you know the exact Android package name)
+
+Only include an action tag when the user's request clearly matches one of these.
+Otherwise just reply normally with no tag. Never invent phone numbers — ask the
+user for the number if they haven't given it.
+"""
+    }
+}
