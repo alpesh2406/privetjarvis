@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var conversationText: TextView
     private lateinit var statusText: TextView
     private lateinit var outerRing: android.widget.ImageView
+    private lateinit var innerRing: android.widget.ImageView
     private lateinit var dashedRing: android.widget.ImageView
     private lateinit var tts: TextToSpeech
     private lateinit var speechRecognizer: SpeechRecognizer
@@ -60,9 +61,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         conversationText = findViewById(R.id.conversationText)
         statusText = findViewById(R.id.statusText)
         outerRing = findViewById(R.id.outerRing)
+        innerRing = findViewById(R.id.innerRing)
         dashedRing = findViewById(R.id.dashedRing)
 
         startAmbientAnimation()
+        startPulseAnimation()
         setupSpeechRecognizer()
         tts = TextToSpeech(this, this)
 
@@ -157,7 +160,29 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         handler.postDelayed({ if (!isSpeaking) startContinuousListening() }, 800)
     }
 
+    private fun startPulseAnimation() {
+        val pulse = android.animation.ObjectAnimator.ofPropertyValuesHolder(
+            micButton,
+            android.animation.PropertyValuesHolder.ofFloat("scaleX", 1f, 1.08f, 1f),
+            android.animation.PropertyValuesHolder.ofFloat("scaleY", 1f, 1.08f, 1f)
+        )
+        pulse.duration = 2200
+        pulse.repeatCount = android.animation.ObjectAnimator.INFINITE
+        pulse.start()
+
+        val innerPulse = android.animation.ObjectAnimator.ofPropertyValuesHolder(
+            innerRing,
+            android.animation.PropertyValuesHolder.ofFloat("scaleX", 1f, 1.05f, 1f),
+            android.animation.PropertyValuesHolder.ofFloat("scaleY", 1f, 1.05f, 1f),
+            android.animation.PropertyValuesHolder.ofFloat("alpha", 0.6f, 1f, 0.6f)
+        )
+        innerPulse.duration = 2200
+        innerPulse.repeatCount = android.animation.ObjectAnimator.INFINITE
+        innerPulse.start()
+    }
+
     private fun startAmbientAnimation() {
+        startPulseAnimation()
         val slowSpin = android.view.animation.RotateAnimation(
             0f, 360f,
             android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
